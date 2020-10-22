@@ -1,2 +1,19 @@
 # PySupercharge
-the supercharging library for bioinformatics
+The supercharging library for bioinformatics.
+
+Official Implementation of Supercharge and Secretion paper [link](#).
+
+Made by [Hieu](https://github.com/min-hieu)
+
+## Requirements
+Python Environment: 3.x
+Python Package Dependency: install the `requirements.txt` file with
+```
+python -m pip install -r requirements.txt
+```
+
+## How to run
+make sure that the requirements are met. Run the follow command in the same dir
+```
+python main.py
+```
