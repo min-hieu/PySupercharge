@@ -17,3 +17,9 @@ make sure that the requirements are met. Run the follow command in the same dir
 ```
 python main.py
 ```
+
+## Examples
+to be added
+
+## Contributions
+to be added
