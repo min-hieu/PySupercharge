@@ -1,4 +1,4 @@
-# PySupercharge
+# PySupercharge ⚡🧬
 The supercharging library for bioinformatics.
 
 Official Implementation of [Supercharge and Secretion](#) paper(Ahn et al.).
