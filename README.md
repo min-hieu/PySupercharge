@@ -1,7 +1,7 @@
 # PySupercharge
 The supercharging library for bioinformatics.
 
-Official Implementation of Supercharge and Secretion paper [link](#).
+Official Implementation of [Supercharge and Secretion](#) paper(Ahn et al.).
 
 Made by [Hieu](https://github.com/min-hieu)
 
