@@ -31,5 +31,6 @@ python superUI.py
 to be added
 
 ## Contributions
-[Hieu](https://github.com/min-hieu) - superUI, 
-[HyonJuong](#) - AvNAPSA_class, AvNAPSA_dict
+[Hieu](https://github.com/min-hieu) - superUI, AvNAPSA_class, PyMol plugin.
+
+[Hyunjong Byun](https://github.com/bighungryjames) - AvNAPSA_class, AvNAPSA_dict.
