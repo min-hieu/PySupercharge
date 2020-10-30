@@ -22,7 +22,7 @@ python superUI.py
 ```
 ### PyMol plugins
 1. install within pymol directory: `schrodinger\PyMol2\Lib\site-packages`
-2. load the 'Show_AvNAPSA_Script' on PyMol's plugin manager.
+2. load the `Show_AvNAPSA_Script` on PyMol's plugin manager.
 3. Choose pdb/pse model to be loaded.
 4. Adjust threshold cut-off value (default: 80)
 5. AvNAPSA selection is shown in red.
