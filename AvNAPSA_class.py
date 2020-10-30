@@ -8,7 +8,7 @@
 #version 1.2: From Hieu's suggestion, I added a script to screen active sites.
 
 from math import sqrt
-import AvNAPSA_dictionary as dict_version
+# import AvNAPSA_dictionary as dict_version
 from tqdm import tqdm
 from Bio.PDB import *
 
@@ -33,7 +33,7 @@ class Atom:
     DEFAULT_Y = 0.0
     DEFAULT_Z = 0.0
     DEFAULT_NEIGHBORCOUNT = 0
-    
+
     def __init__(self):
         self.field = Atom.DEFAULT_FIELD
         self.atomNum = Atom.DEFAULT_ATOMNUM
@@ -45,7 +45,7 @@ class Atom:
         self.y = Atom.DEFAULT_Y
         self.z = Atom.DEFAULT_Z
         self.neighborCount = Atom.DEFAULT_NEIGHBORCOUNT
-    
+
     def __str__(self):
         out = self.resName + str(self.resNum) + self.atomName
         return out
@@ -53,14 +53,14 @@ class Atom:
 
 class Residue:
     DEFAULT_AVNAPSA = 0
-    
+
     def __init__(self):
         self.resName = Atom.DEFAULT_RESNAME
         self.chain = Atom.DEFAULT_CHAIN
         self.resNum = Atom.DEFAULT_RESNUM
         self.atoms = []
         self.AvNAPSA = Residue.DEFAULT_AVNAPSA
-    
+
     def __str__(self):
         out = ''
         if not len(self.atoms) == 0:
@@ -87,10 +87,10 @@ class Residue:
     #}
     #}
     #}
-    
+
     def __len__(self):
         return len(self.atoms)
-    
+
     def append(self, atom):
         if not isinstance(atom, Atom):
             return False
@@ -108,7 +108,7 @@ class Residue:
                 return False
             self.atoms.append(atom)
         return True
-    
+
     def calc_AvNAPSA(self):
         sum_neighborCount = 0
         num_sidechain = 0
@@ -123,7 +123,7 @@ class Residue:
             AvNAPSA = 10000.0
         self.AvNAPSA = AvNAPSA
         pass
-    
+
     ## compute_residue_avNapsa
     ##
     ## for each residue, compute
@@ -211,45 +211,33 @@ def resNum_to_resIndex(residues, resNum):
 #ATOM       1        N          THR     A          12        -4.777  -6.979  -3.511  1.00  0.70      N
 #ATOM       2        CA         THR     A          12        -5.738  -6.248  -2.633  1.00  0.70      C
 
-def readPDB(filename='./input.pdb'):
-#resName = ''
-#resNum = -1
-#atomName = ''
-#atomNum = -1
-#chain = ''
-#field = '' 
-##in the original code, "type". but type is a built-in function in python, so I had to avoid.
-    atoms = []
-    try:
-        f = open(filename, 'r')
-    except RuntimeError:
-        print('Could not open {}\n'.format(filename))
-        return atoms
-    
-    while True:
-        line = f.readline()
+def readPDBstr(string):
+    lines   = string.splitlines((True))
+    atoms   = []
+
+    for line in lines:
         if not line:
             break
-        
+
         field = line[0:6].strip().upper()
         if not field in ('ATOM', 'HETATM'): # RTyp field is columns 1-6
             continue
-        
+
         resName = line[17:20].strip().upper() # Res field is columns 18-20
         if resName == 'HOH':
             continue
-        
+
         atomName = line[12:16].strip().upper() # Atm field is columns 13-16
         if atomName[-1] == 'H' and atomName[:-1].isdecimal():
             continue
-        
+
         atomNum = int(line[6:11].strip()) # Num field is columns 7-11
         chain = line[21:22].strip().upper() # Chain field is column 22
         resNum = int(line[22:26].strip()) # ResNo field is columns 23-26
         x = float(line[30:38].strip()) # X field is columns 31-38
         y = float(line[38:46].strip()) # Y field is columns 39-46
         z = float(line[46:54].strip()) # Z field is columns 37-54
-        
+
         atom = Atom()
         atom.field = field
         atom.atomNum = atomNum
@@ -261,7 +249,63 @@ def readPDB(filename='./input.pdb'):
         atom.y = y
         atom.z = z
         atom.neighborCount = 0
-        
+
+        atoms.append(atom)
+
+    return atoms
+
+
+def readPDB(filename='./input.pdb'):
+#resName = ''
+#resNum = -1
+#atomName = ''
+#atomNum = -1
+#chain = ''
+#field = ''
+##in the original code, "type". but type is a built-in function in python, so I had to avoid.
+    atoms = []
+    try:
+        f = open(filename, 'r')
+    except RuntimeError:
+        print('Could not open {}\n'.format(filename))
+        return atoms
+
+    while True:
+        line = f.readline()
+        if not line:
+            break
+
+        field = line[0:6].strip().upper()
+        if not field in ('ATOM', 'HETATM'): # RTyp field is columns 1-6
+            continue
+
+        resName = line[17:20].strip().upper() # Res field is columns 18-20
+        if resName == 'HOH':
+            continue
+
+        atomName = line[12:16].strip().upper() # Atm field is columns 13-16
+        if atomName[-1] == 'H' and atomName[:-1].isdecimal():
+            continue
+
+        atomNum = int(line[6:11].strip()) # Num field is columns 7-11
+        chain = line[21:22].strip().upper() # Chain field is column 22
+        resNum = int(line[22:26].strip()) # ResNo field is columns 23-26
+        x = float(line[30:38].strip()) # X field is columns 31-38
+        y = float(line[38:46].strip()) # Y field is columns 39-46
+        z = float(line[46:54].strip()) # Z field is columns 37-54
+
+        atom = Atom()
+        atom.field = field
+        atom.atomNum = atomNum
+        atom.atomName = atomName
+        atom.resName = resName
+        atom.chain = chain
+        atom.resNum = resNum
+        atom.x = x
+        atom.y = y
+        atom.z = z
+        atom.neighborCount = 0
+
         atoms.append(atom)
     f.close()
     return atoms
@@ -509,7 +553,7 @@ def resNum_list_from_site_str(start_index, max_len, site):
         else:
             resnum_list.extend(item)
     return resNum_list
-    
+
 ################Hieu's original code#################
 #def activeSite(start_ind, max_len, site, window = 3):
     #start_index = int(start_ind)
@@ -529,7 +573,7 @@ def resNum_list_from_site_str(start_index, max_len, site):
         #addition.add(int(inpt[i])+w)
 
     #inpt = [x for x in sorted(list(set(inpt) | addition)) if x > 0 and x < max_len]
-    
+
     #return inpt
 
 
@@ -555,8 +599,8 @@ def _input_threshold():
         print('Please enter int value!')
         return _input_threshold()
     return out
-    
-    
+
+
 
 ########################################################
 def _main(filename = './1998.pdb'):
@@ -594,7 +638,35 @@ def _main(filename = './1998.pdb'):
     print(']', end='')
     return AvNAPSA, residues
 
+def getAvNAPSA(protein, atoms, thres=80):
 
+    threshold       = thres
+
+    neighbor_list = compute_neighbor_counts2(protein)
+    for i, atom in enumerate(atoms):
+        atom.neighborCount = neighbor_list[i]
+
+    residues        = residues_from_atoms(atoms)
+    resName_list    = ['GLN', 'ASN', 'LYS', 'ARG']
+    residues        = filter_residues_with_resName(residues, resName_list)
+
+    for residue in residues:
+        residue.calc_AvNAPSA()
+        AvNAPSA = residue.AvNAPSA
+
+    residues        = filter_residues_with_threshold(residues, threshold)
+    AvNAPSAs        = []
+
+    for residue in residues:
+        AvNAPSA = residue.AvNAPSA
+        AvNAPSAs.append(AvNAPSA)
+
+    print(AvNAPSAs)
+    print('[', end='')
+    for residue in residues:
+        print(residue, end=', ')
+    print(']', end='')
+    return AvNAPSA, residues
 
 if __name__ == '__main__':
     _main()
