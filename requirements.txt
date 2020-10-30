@@ -1,3 +1,4 @@
 biopython==1.78
 PyQt5==5.15.0
 tqdm==4.50.2
+matplotlib==3.3.2
