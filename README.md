@@ -7,7 +7,7 @@ Official Implementation of [Supercharge and Secretion](#) paper(Ahn et al.).
 
 
 ## Requirements
-Python Environment: 3.x
+Python Environment: 3.x. 
 Python Package Dependency: install the `requirements.txt` file with
 ```
 python -m pip install -r requirements.txt
