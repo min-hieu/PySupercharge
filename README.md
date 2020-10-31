@@ -14,7 +14,7 @@ python -m pip install -r requirements.txt
 ```
 
 ## How to run
-### LCD analysis
+### Supercharge analysis
 make sure that the requirements are met, and the PyAvNAPSA folder is inside the `python\Lib\site-packages`
 Run the follow command in the directory to open GUI interface for the script
 ```
@@ -28,7 +28,17 @@ python superUI.py
 5. AvNAPSA selection is shown in red.
 
 ## Examples
-to be added
+### Supercharging
+Inside the `example` folder, there is a pdb file and a consurf grade file for the 2013PEDV.
+follow to step to get the following result:
+1. Import Consurf, sequence should be automatically added after choosing the file.
+2. Import PDB, AvNAPSA value will be calculated in the terminal and might takes a while.
+3. Adjust the threshold (in this case: 3)
+4. Press `Supercharge` and `Export`.
+5. The file should be in the same folder as the terminal current directory.
+6. The exported result named `result.html` should looks like this.
+<img src="https://github.com/min-hieu/PySupercharge/blob/main/img/result.png" width="250">
+
 
 ## Contributions
 [Hieu](https://github.com/min-hieu) - superUI, AvNAPSA_class, PyMol plugin.
