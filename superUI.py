@@ -8,7 +8,7 @@ from matplotlib.backends.qt_compat import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import (FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-from supernew import superSeq
+from PySupercharge.supernew import superSeq
 from PySupercharge import AvNAPSA_class
 
 
@@ -179,9 +179,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.setObjectName("horizontalLayout_12")
         spacerItem12 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_12.addItem(spacerItem12)
-        self.buttonPDBImport = QtWidgets.QPushButton(self.centralwidget)
-        self.buttonPDBImport.setObjectName("buttonPDBImport")
-        self.horizontalLayout_12.addWidget(self.buttonPDBImport)
         spacerItem13 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_12.addItem(spacerItem13)
         self.verticalLayout.addLayout(self.horizontalLayout_12)
@@ -276,6 +273,8 @@ class Ui_MainWindow(object):
 
         self.buttonImportConsurf.clicked.connect(lambda: self.importConsurf())
 
+        self.buttonImportPDB.clicked.connect(lambda: self.importPDB())
+
         self.buttonSupercharge.clicked.connect(lambda: self.superCharge(MainWindow.ax))
 
         self.buttonClear.clicked.connect(lambda: self.clearGraph(MainWindow.ax))
@@ -330,15 +329,18 @@ class Ui_MainWindow(object):
         print(self.consurfScore)
         self.labelConsurfStatus.setText("Imported")
         self.inputSeq.setText(aaSeq)
-        
+        self.checkConSurf.setVisible(True)
+
 
     @pyqtSlot()
     def importPDB(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(None, 'Select PDB File', '.txt')
 
-        self.avnapsaScore, _ = AvNAPSA_class._main(filename=filename)
-        self.labelPDBStatus.setText("Imported")
 
+        _, self.avnapsaScore = AvNAPSA_class.getAvNAPSAFileIndex(filename=list(filename)[0])
+        self.labelPDBStatus.setText("Imported")
+        self.checkAvNAPSA.setVisible(True)
+        
 
 
     @pyqtSlot()
@@ -380,6 +382,8 @@ class Ui_MainWindow(object):
 
             ax.figure.canvas.draw()
             mutatedText = '[ ' + ', '.join(map(str, [x+1 for x in mutated])) + ' ]'
+            if len(mutated) == 0:
+                mutatedText = "[ -1, -1 ]"
             resultText = ''.join(newSeq) + '\n' + mutatedText + '\n\n'
             if self.checkPrevious.isChecked():
                 oldResult = self.outputResult.toPlainText()
@@ -417,13 +421,15 @@ class Ui_MainWindow(object):
 
         ax.figure.canvas.draw()
 
+
     @pyqtSlot()
     def exportHTML(self):
         text = self.outputResult.toPlainText()
         tList = text.split('\n\n')
         tList.remove('')
+        consf, avnap = None, None
 
-        if self.labelCosurfStatus.text() != 'Not Imported':                
+        if self.labelConsurfStatus.text() != 'Not Imported':                
             consf = self.consurfScore
         if self.labelPDBStatus.text() != 'Not Imported':
             avnap = self.avnapsaScore
@@ -463,7 +469,6 @@ class Ui_MainWindow(object):
         self.buttonSupercharge.setText(_translate("MainWindow", "Supercharge"))
         self.checkAvNAPSA.setText(_translate("MainWindow", "AvNAPSA"))
         self.checkConSurf.setText(_translate("MainWindow", "Consurf"))
-        self.buttonPDBImport.setText(_translate("MainWindow", "import PDB"))
         self.labelResult.setText(_translate("MainWindow", "Result"))
         self.checkAdd.setText(_translate("MainWindow", "add"))
         self.checkSeperate.setText(_translate("MainWindow", "seperate window"))
@@ -480,18 +485,19 @@ def writeHTML(tlist,consf,avnap,co=False):
 
     color = ('0A7D82','4BAFBE','A5DCE6','D7F0F0','FFFFFF')
 
+    seq, mu_index = tlist[0].split('\n')
+
     with open('result.html', 'w') as html:
 
         html.write('<center><font face="Times New Roman" size="15">Supercharging Result</font></center><br><br>')
 
         newSeq = ''
         if consf != None: #consurf === (exposureList, consurfList)
-            html.write("<font face='Times New Roman' size='3'> >Consurf Result: </font>")
+            html.write("<font face='Times New Roman' size='3'> >Consurf Result: </font><br>")
 
             for i,e in enumerate(seq):
-                if consf[i] < 6:
-                    mu_index.pop()
-                    newSeq+='<span style="background-color: #%s">'%(color[consf[i]]) +e+'</span>'
+                if i < len(consf) and consf[i] < 6:
+                    newSeq+='<span style="background-color: #%s">'%(color[consf[i]-1]) +e+'</span>'
                 else: newSeq+=e
                 if i+1!=0 and (i+1)%10==0:newSeq+='&nbsp;'
                 if i+1!=0 and (i+1)%50==0:newSeq+='<br>'
@@ -504,14 +510,14 @@ def writeHTML(tlist,consf,avnap,co=False):
 
         newSeq = ''
         if avnap != None:
-            html.write("<font face='Times New Roman' size='3'> >AvNAPSA Result: </font>")
+            html.write("<font face='Times New Roman' size='3'> >AvNAPSA Result: </font><br>")
 
             avnap = avnap[::-1]
 
             for i,e in enumerate(seq):
                 if len(avnap)!=0 and i == avnap[-1]-1:
                     avnap.pop()
-                    newSeq+='<span style="background-color: #ff006a">'+e+'<span>'                    
+                    newSeq+='<span style="background-color: #ff006a">'+e+'</span>'                    
                 else: newSeq+=e
                 if i+1!=0 and (i+1)%10==0:newSeq+='&nbsp;'
                 if i+1!=0 and (i+1)%50==0:newSeq+='<br>'
@@ -540,11 +546,17 @@ def writeHTML(tlist,consf,avnap,co=False):
             html.write(newSeq)
 
 
-if __name__ == "__main__":
-    import sys
+def testing():
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    import sys
+    try:
+        testing()
+    except Exception as e:
+        print(e)
