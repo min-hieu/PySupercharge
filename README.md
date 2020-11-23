@@ -2,6 +2,7 @@
 The supercharging library for bioinformatics.
 
 Official Implementation of [Supercharge and Secretion](#) paper(Ahn et al.).
+Official Web Implementation: [WebSupercharging](hieu.digital/apps/supercharge)
 
 ##
 
