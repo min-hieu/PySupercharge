@@ -17,17 +17,20 @@ import numpy as np
 #-------------Supercharging Standalone Backend--------------
 
 #Global variables
+#Charge list of amino acids
 chargeDict={'D': -1, 'T': 0, 'S': 0, 'E': -1, 'P': 0, 'G': 0, 'A': 0,\
             'C': -0.1, 'V': 0, 'M': 0, 'I': 0, 'L': 0, 'Y': 0,'F': 0,\
             'H': 0.1, 'K': 1, 'R': 1, 'W': 0, 'Q': 0, 'N': 0}
 
+#Amino acid list
 aaList=['D', 'T', 'S', 'E', 'P', 'G', 'A', 'C', 'V', 'M',
     'I', 'L', 'Y', 'F', 'H', 'K', 'R', 'W', 'Q', 'N']
 
+#matplotlib style
 style.use("seaborn-notebook")
 
 
-
+#Class 
 class superSeq(object):
 
     def __init__(self, seqRaw, filename='', name='protein',formated=False):
@@ -149,12 +152,16 @@ class superSeq(object):
 
         return sum(round([chargeDict[i] for i in seq],1))
 
-    
+
+
     @staticmethod
     def consurfReader(filename):
         if type(filename) != str or filename[-6:] != 'grades':
             print('please import again')
             return None
+        # if type(filename) != str:
+        #     print('please import again')
+        #     return None
         else:
             if filename == "":
                 return None
@@ -162,12 +169,18 @@ class superSeq(object):
             scores,exposures,seqStr = [],[], ''
 
             with open(filename, "r") as f:
+                flag = False
                 for i, line in enumerate(f):
-
-                    if i > 15:
-                        if line == '\n':
-                            break
+                    if i>15:
+                        if flag and line == '\n': break
                         lineList = line.split()
+                        if len(lineList)==0: continue
+                        if lineList[0] == '1': flag=True 
+                        if not flag: continue
+
+                        try: float(lineList[2])
+                        except: lineList.pop(2)
+                        
                         scores.append(lineList[3])
                         seqStr += lineList[1]
                         if ','==lineList[4][-1]:
@@ -202,29 +215,31 @@ class superSeq(object):
     
 
     def getSuperExhaustive(self,consurf=[], threshold=4, limit=-1, window=20,\
-                           exclude=[], include=[],incl=False,target=['R','K'],standin=['D','E']):
+                           exclude=[], include=[],incl=False,target=['R','K'],standin=['D','E'], scores={}):
         charge = superSeq.getChargeArray(self.seqStr)
         aaseq = list(self.seqStr[:])
         consurf = consurf
         n = len(charge)
 
         mutated = []
-
+        mutatedScores = []
 
         if len(consurf) != 0:
             for i in range(n-window):
                 if round(sum(charge[i:i+window]),1) > threshold:
-                    for j in range(20)[::-1]:
+                    for j in range(window)[::-1]:
                         if aaseq[i+j] in target and (i+j) not in exclude:
-                            if include == True:
+                            if len(include) != 0:
                                 if (i+j) in include:
                                     charge[i+j] = -1
                                     aaseq[i+j] = random.choice(standin)
-                                    mutated.append(i+j) 
+                                    mutated.append(i+j)  
+                                    mutatedScores.append(scores[i+j])
                             else:
                                 charge[i+j] = -1
                                 aaseq[i+j] = random.choice(standin)
                                 mutated.append(i+j)
+                                mutatedScores.append(scores[i+j])
                         if round(sum(charge[i:i+window]),1) < threshold:
                             break
         else:
@@ -232,33 +247,36 @@ class superSeq(object):
                 if round(sum(charge[i:i+window]),1) > threshold:
                     for j in range(20)[::-1]:
                         if aaseq[i+j] in target and (i+j) not in exclude:
-                            if include == True:
+                            if len(include) != 0:
                                 if (i+j) in include:
                                     charge[i+j] = -1
                                     aaseq[i+j] = random.choice(standin)
-                                    mutated.append(i+j) 
+                                    mutated.append(i+j)  
+                                    mutatedScores.append(scores[i+j])
                             else:
                                 charge[i+j] = -1
                                 aaseq[i+j] = random.choice(standin)
                                 mutated.append(i+j)
+                                mutatedScores.append(scores[i+j])
                         if round(sum(charge[i:i+window]),1) < threshold:
                             break
                             
-        return mutated, charge, aaseq
+        return mutated, mutatedScores, charge, aaseq
 
 
-    def superGraph(self,thres=4,limit=-1,w=20,excl=[],incl=[],tar=['R','K'],stand=['D','E']):
+    def superGraph(self,thres=4,limit=-1,w=20,excl=[],incl=[],tar=['R','K'],stand=['D','E'], scores={}):
 
         y1 = self.getChargePool(self.seqStr)
         
-        mutated,y2,newSeq = self.getSuperExhaustive(threshold=thres,window=w,exclude=excl, include=incl,target=tar,standin=stand)
+        mutated,mutatedScores,y2,newSeq = self.getSuperExhaustive(threshold=thres,window=w,exclude=excl, include=incl,target=tar,standin=stand,scores=scores)
 
         y2 = self.chargeArraytoPool(y2)
 
         x = range(len(y1))
         print(mutated)
+        print(mutatedScores)
 
-        return x,y1,y2,newSeq, mutated
+        return x,y1,y2,newSeq, mutated, mutatedScores
 
 
 #----------------Unit Testing---------------
