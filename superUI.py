@@ -98,18 +98,29 @@ class Ui_MainWindow(object):
         spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem6)
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout_3)
+
+        # Avnapsa threshold input
+        self.labelAvThres = QtWidgets.QLabel(self.centralwidget)
+        self.labelAvThres.setObjectName("labelAvThres")
+        self.formLayout_2.setWidget(8, QtWidgets.QFormLayout.LabelRole, self.labelAvThres)
+        self.inputAvThres = QtWidgets.QTextEdit(self.centralwidget)
+        self.inputAvThres.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.inputAvThres.setObjectName("inputAvThres")
+        self.formLayout_2.setWidget(8, QtWidgets.QFormLayout.FieldRole, self.inputAvThres)
+
+
         self.labelTarget = QtWidgets.QLabel(self.centralwidget)
         self.labelTarget.setObjectName("labelTarget")
         self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.labelTarget)
         self.inputTarget = QtWidgets.QTextEdit(self.centralwidget)
-        self.inputTarget.setMaximumSize(QtCore.QSize(16777215, 23))
+        self.inputTarget.setMaximumSize(QtCore.QSize(16777215, 30))
         self.inputTarget.setObjectName("inputTarget")
         self.formLayout_2.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.inputTarget)
         self.labelStandin = QtWidgets.QLabel(self.centralwidget)
         self.labelStandin.setObjectName("labelStandin")
         self.formLayout_2.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.labelStandin)
         self.inputStandin = QtWidgets.QTextEdit(self.centralwidget)
-        self.inputStandin.setMaximumSize(QtCore.QSize(16777215, 23))
+        self.inputStandin.setMaximumSize(QtCore.QSize(16777215, 30))
         self.inputStandin.setObjectName("inputStandin")
         self.formLayout_2.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.inputStandin)
         self.labelExclude = QtWidgets.QLabel(self.centralwidget)
@@ -285,9 +296,9 @@ class Ui_MainWindow(object):
 
         #=============== Extra Variables =================
 
-        self.consurfScore   = None
+        self.consurfScore   = None # consurf score of each residue
         self.exposureScore  = None
-        self.avnapsaScore   = None
+        self.avnapsaResidues   = None # list of residues that have lower avnapsa score than threshold
 
         #=============== Default Parameters =================
 
@@ -295,6 +306,7 @@ class Ui_MainWindow(object):
         self.inputStandin.setText("D,E")
         self.inputInclude.setText("")
         self.inputExclude.setText("")
+        self.inputAvThres.setText("150")
 
         if self.labelConsurfStatus.text() == 'Not Imported':
             self.checkConSurf.setVisible(False)
@@ -335,37 +347,58 @@ class Ui_MainWindow(object):
     @pyqtSlot()
     def importPDB(self):
         filename = QtWidgets.QFileDialog.getOpenFileName(None, 'Select PDB File', '.txt')
-
-
-        _, self.avnapsaScore = AvNAPSA_class.getAvNAPSAFileIndex(filename=list(filename)[0])
+        self.pdbfile = list(filename)[0]
         self.labelPDBStatus.setText("Imported")
         self.checkAvNAPSA.setVisible(True)
-        
 
 
     @pyqtSlot()
     def superCharge(self,ax):
         try:
             thres = int(self.inputThres.text())
+            avthres = int(self.inputAvThres.toPlainText())
             target = self.inputTarget.toPlainText().split(',')
             standin = self.inputStandin.toPlainText().split(',')
-            exclude = superSeq.formatSite(self.inputExclude.toPlainText())
-            include = superSeq.formatSite(self.inputInclude.toPlainText())
+            exclude = superSeq.formatSite(self.inputExclude.toPlainText()) # residues cannot be mutated
+            include = superSeq.formatSite(self.inputInclude.toPlainText()) # residues might be mutated
+
+            include = list(include)
+            exclude = list(exclude)
 
             sSeq = superSeq(self.inputSeq.toPlainText())
 
             print(self.labelConsurfStatus.text)
 
+            aaInfo = dict() # AvNAPSA and consurf score of each amino acid residues
+
+            # AvNAPSA
+
+            self.avnapsaResidues = []
+            scores , residues = AvNAPSA_class.getAvNAPSAFileIndex(filename=self.pdbfile, thres=avthres)
+            print("AvNAPSA Threshold:", avthres)
+            for i,a in enumerate(residues):
+                if i>0 and a==residues[0]: break 
+                self.avnapsaResidues.append([a, scores[i]])
+            print(self.avnapsaResidues)
+
+
+            # Consurf 
+
             if self.labelConsurfStatus.text() == "Imported":
-                for i,aa in enumerate(self.inputSeq.toPlainText()):
-                    if self.consurfScore[i] < 6:
-                        include.append(i)
-                    if self.consurfScore[i] > 5:
-                        exclude.append(i)
+                for r in self.avnapsaResidues:
+                    if r[0] > len(self.consurfScore):
+                        include.append(r[0])
+                        aaInfo[r[0]] = [r[1], -1]
+                    elif self.consurfScore[r[0]] <= 5:
+                        include.append(r[0])
+                        aaInfo[r[0]] = [r[1], self.consurfScore[r[0]]]
+                    elif self.consurfScore[r[0]] > 5:
+                        exclude.append(r[0])
 
-            print(include)
+            include.sort()
+            print("include:", include)
 
-            x, y1, y2, newSeq, mutated = sSeq.superGraph(thres=thres,excl=exclude,incl=include,tar=target, stand=standin)
+            x, y1, y2, newSeq, mutated, mutatedScores = sSeq.superGraph(thres=thres,excl=exclude,incl=include,tar=target, stand=standin, scores=aaInfo)
             if not self.checkAdd.isChecked():
                 ax.clear()
                 ax.plot(x, y1, color='blue')
@@ -381,7 +414,9 @@ class Ui_MainWindow(object):
                 plt.show()
 
             ax.figure.canvas.draw()
-            mutatedText = '[ ' + ', '.join(map(str, [x+1 for x in mutated])) + ' ]'
+            mutatedText = '[ ' + ', '.join(map(str, [x+1 for x in mutated])) + ' ]' \
+                        + '\n' + 'AvNAPSA: ' + '[ ' + ', '.join(map(str, [round(x[0],1) for x in mutatedScores])) + ' ]' \
+                        + '\n' + 'Consurf: ' + '[ ' + ', '.join(map(str, [x[1] for x in mutatedScores])) + ' ]'
             if len(mutated) == 0:
                 mutatedText = "[ -1, -1 ]"
             resultText = ''.join(newSeq) + '\n' + mutatedText + '\n\n'
@@ -432,8 +467,7 @@ class Ui_MainWindow(object):
         if self.labelConsurfStatus.text() != 'Not Imported':                
             consf = self.consurfScore
         if self.labelPDBStatus.text() != 'Not Imported':
-            avnap = self.avnapsaScore
-
+            avnap = self.avnapsaResidues
 
         writeHTML(tList,consf,avnap)
 
@@ -463,6 +497,7 @@ class Ui_MainWindow(object):
         self.labelConsurf.setText(_translate("MainWindow", "ConSurf"))
         self.labelConsurfStatus.setText(_translate("MainWindow", "Not Imported"))
         self.buttonImportConsurf.setText(_translate("MainWindow", "Import"))
+        self.labelAvThres.setText(_translate("MainWindow", "AvNAPSA Threshold"))
         self.label_2.setText(_translate("MainWindow", "PDB"))
         self.labelPDBStatus.setText(_translate("MainWindow", "Not Imported"))
         self.buttonImportPDB.setText(_translate("MainWindow", "Import "))
