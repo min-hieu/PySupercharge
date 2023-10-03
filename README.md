@@ -4,7 +4,7 @@ The supercharging library for bioinformatics.
 Official Implementation of [Supercharge and Secretion](#) paper(Ahn et al.).
 Official Web Implementation: [WebSupercharging](https://mb.re.kr/apps/supercharge)
 
-***
+
 ## What is PySupercharge? - short introduction -
 Decreasing electric charge by modifying amino acid sequence can improve the secretion ability of protein through bacterial ABC transporter system. PySupercharge replaces positive amino acids (Lys, Arg) that satisfy two conditions (AvNAPSA and consurf score) with negative amino acids (Glu, Asp) when the amino acid sequence has a high electric charge locally.
 #### AvNAPSA score
@@ -34,6 +34,7 @@ python superUI.py
 4. Adjust threshold cut-off value (default: 80)
 5. AvNAPSA selection is shown in red.
 
+***
 ## Examples
 ### Supercharging
 Inside the `example` folder, there is a pdb file and a consurf grade file for the 2013PEDV.
