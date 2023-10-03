@@ -8,9 +8,9 @@ Official Web Implementation: [WebSupercharging](https://mb.re.kr/apps/supercharg
 ## What is PySupercharge? - short introduction -
 Decreasing electric charge by modifying amino acid sequence can improve the secretion ability of protein through bacterial ABC transporter system. PySupercharge replaces positive amino acids (Lys, Arg) that satisfy two conditions (AvNAPSA and consurf score) with negative amino acids (Glu, Asp) when the amino acid sequence has a high electric charge locally.
 #### AvNAPSA score
-The lower AvNAPSA score means fewer neighboring atoms and therefore less interaction. It ensures that the amino acid replacement will not make a significant change in the shape of the protein.
+The lower AvNAPSA score means fewer neighboring atoms and therefore less interaction. It ensures that the amino acid replacement will not make a significant change in the shape of the protein.An AvNAPSA cutoff of <150 has been widely used.
 #### Consurf score
-Consurf score identifies conserved regions of the polypeptide by tracing evolutionary history. Therefore it can determine whether the amino acid replacement causes functional problems of protein.
+Consurf score identifies conserved regions of the polypeptide by tracing evolutionary history. Therefore it can determine whether the amino acid replacement causes functional problems of protein. A consurf score should be less or equal to 5 to be replaced.
 ***
 
 ## Requirements
