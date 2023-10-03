@@ -543,15 +543,15 @@ def filter_residues_around_resNum(residues, resNum_list, window=3):
 
 def resNum_list_from_site_str(start_index, max_len, site):
     resNum_list = []
-    start_index = int(start_ind) #resNum of the first residue in residues
+    start_index = int(start_index) #resNum of the first residue in residues
     max_len = int(max_len)
     site_list = site.split('+')
     for item in site_list:
         if '-' in item:
             l = item.split('-')
-            resnum_list.extend(range(int(l[0]), int(l[-1])))
+            resNum_list.extend(range(int(l[0]), int(l[-1])))
         else:
-            resnum_list.extend(item)
+            resNum_list.extend(item)
     return resNum_list
 
 ################Hieu's original code#################
