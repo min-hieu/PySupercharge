@@ -51,6 +51,7 @@ follow the steps to get the following result:
 
 <img src="https://github.com/min-hieu/PySupercharge/blob/main/img/label-window.png">
 
+***
 ## Contributions
 [Hieu](https://github.com/min-hieu) - superUI, AvNAPSA_class, PyMol plugin.
 
