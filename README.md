@@ -45,11 +45,11 @@ follow the steps to get the following result:
 4. Press `Supercharge` and `Export`.
 5. The file should be in the same folder as the terminal current directory.
 6. The exported result named `result.html` should looks like this.
-<img src="https://github.com/YerinKim125/PySupercharge/blob/main/img/result.png" width="250">
+<img src="https://github.com/min-hieu/PySupercharge/blob/main/img/result.png" width="250">
 
 ## GUI helpful schematic
 
-<img src="https://github.com/YerinKim125/PySupercharge/blob/main/img/label-window.png">
+<img src="https://github.com/min-hieu/PySupercharge/blob/main/img/label-window.png">
 
 ***
 ## Contributions
