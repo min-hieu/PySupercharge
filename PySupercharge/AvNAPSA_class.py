@@ -534,7 +534,7 @@ def filter_residues_with_threshold(residues, threshold):
 def filter_residues_around_resNum(residues, resNum_list, window=3):
     resNum_set = set()
     for resNum in resNum_list:
-        for j in range(i-window, i+window+1):
+        for j in range(j-window, j+window+1):
             if j < 1:
                 continue
             resNum_set.add(j)
@@ -543,15 +543,15 @@ def filter_residues_around_resNum(residues, resNum_list, window=3):
 
 def resNum_list_from_site_str(start_index, max_len, site):
     resNum_list = []
-    start_index = int(start_ind) #resNum of the first residue in residues
+    start_index = int(start_index) #resNum of the first residue in residues
     max_len = int(max_len)
     site_list = site.split('+')
     for item in site_list:
         if '-' in item:
             l = item.split('-')
-            resnum_list.extend(range(int(l[0]), int(l[-1])))
+            resNum_list.extend(range(int(l[0]), int(l[-1])))
         else:
-            resnum_list.extend(item)
+            resNum_list.extend(item)
     return resNum_list
 
 ################Hieu's original code#################
@@ -638,11 +638,9 @@ def _main(filename = './1998.pdb'):
     print(']', end='')
     return AvNAPSA, residues
 
-def getAvNAPSAFileIndex(filename, thres=80):
+def getAvNAPSAFileIndex(filename, thres=150):
 
-    # threshold = _input_threshold()
-    threshold       = 80
-    atoms           = readPDB(filename=filename)
+    atoms = readPDB(filename=filename)
 
     parser = PDBParser()
     protein = parser.get_structure('1998',filename)
@@ -660,7 +658,7 @@ def getAvNAPSAFileIndex(filename, thres=80):
         residue.calc_AvNAPSA()
         AvNAPSA = residue.AvNAPSA
 
-    residues        = filter_residues_with_threshold(residues, threshold)
+    residues        = filter_residues_with_threshold(residues, thres)
     AvNAPSAs        = []
 
     for residue in residues:
@@ -673,9 +671,9 @@ def getAvNAPSAFileIndex(filename, thres=80):
         print(residue, end=', ')
     print(']', end='')
 
-    residues = [res_origin.index(res.resNum) for res in residues]
+    residues = [res.resNum -1 for res in residues]
 
-    return AvNAPSA, residues
+    return AvNAPSAs, residues
 
 
 def getAvNAPSA(protein, atoms, thres=80):
@@ -706,7 +704,7 @@ def getAvNAPSA(protein, atoms, thres=80):
     for residue in residues:
         print(residue, end=', ')
     print(']', end='')
-    return AvNAPSA, residues
+    return AvNAPSAs, residues
 
 if __name__ == '__main__':
     _main()

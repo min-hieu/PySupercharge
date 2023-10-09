@@ -2,10 +2,16 @@
 The supercharging library for bioinformatics.
 
 Official Implementation of [Supercharge and Secretion](#) paper(Ahn et al.).
-Official Web Implementation: [WebSupercharging](https://hieu.digital/apps/supercharge)
+Official Web Implementation: [WebSupercharging](https://mb.re.kr/apps/supercharge)
 
-##
 
+## What is PySupercharge? - short introduction -
+Decreasing electric charge by modifying amino acid sequence can improve the secretion ability of protein through bacterial ABC transporter system. PySupercharge replaces positive amino acids (Lys, Arg) that satisfy two conditions (AvNAPSA and consurf score) with negative amino acids (Glu, Asp) when the amino acid sequence has a high electric charge locally.
+#### AvNAPSA score
+The lower AvNAPSA score means fewer neighboring atoms and therefore less interaction. It ensures that the amino acid replacement will not make a significant change in the shape of the protein.An AvNAPSA cutoff of <150 has been widely used.
+#### Consurf score
+Consurf score identifies conserved regions of the polypeptide by tracing evolutionary history. Therefore it can determine whether the amino acid replacement causes functional problems of protein. A consurf score should be less or equal to 5 to be replaced.
+***
 
 ## Requirements
 Python Environment: 3.x. 
@@ -28,6 +34,7 @@ python superUI.py
 4. Adjust threshold cut-off value (default: 80)
 5. AvNAPSA selection is shown in red.
 
+***
 ## Examples
 ### Supercharging
 Inside the `example` folder, there is a pdb file and a consurf grade file for the 2013PEDV.
@@ -44,7 +51,10 @@ follow the steps to get the following result:
 
 <img src="https://github.com/min-hieu/PySupercharge/blob/main/img/label-window.png">
 
+***
 ## Contributions
 [Hieu](https://github.com/min-hieu) - superUI, AvNAPSA_class, PyMol plugin.
 
 [Hyunjong Byun](https://github.com/bighungryjames) - AvNAPSA_class, AvNAPSA_dict.
+
+[Yerin Kim](https://github.com/YerinKim125)
