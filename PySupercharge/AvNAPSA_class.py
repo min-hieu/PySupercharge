@@ -543,15 +543,15 @@ def filter_residues_around_resNum(residues, resNum_list, window=3):
 
 def resNum_list_from_site_str(start_index, max_len, site):
     resNum_list = []
-    start_index = int(start_index) #resNum of the first residue in residues
+    start_index = int(start_ind) #resNum of the first residue in residues
     max_len = int(max_len)
     site_list = site.split('+')
     for item in site_list:
         if '-' in item:
             l = item.split('-')
-            resNum_list.extend(range(int(l[0]), int(l[-1])))
+            resnum_list.extend(range(int(l[0]), int(l[-1])))
         else:
-            resNum_list.extend(item)
+            resnum_list.extend(item)
     return resNum_list
 
 ################Hieu's original code#################
@@ -606,7 +606,7 @@ def _input_threshold():
 def _main(filename = './1998.pdb'):
 
     # threshold = _input_threshold()
-    threshold       = 80
+    threshold       = 150
     atoms           = readPDB(filename=filename)
 
     parser = PDBParser()
@@ -638,7 +638,7 @@ def _main(filename = './1998.pdb'):
     print(']', end='')
     return AvNAPSA, residues
 
-def getAvNAPSAFileIndex(filename, thres=150):
+def getAvNAPSAFileIndex(filename, resName_list=['LYS','ARG'], thres=150):
 
     atoms = readPDB(filename=filename)
 
@@ -651,7 +651,6 @@ def getAvNAPSAFileIndex(filename, thres=150):
 
     res_origin      = tuple(res.resNum for res in residues_from_atoms(atoms))
     residues        = residues_from_atoms(atoms)
-    resName_list    = ['GLN', 'ASN', 'LYS', 'ARG']
     residues        = filter_residues_with_resName(residues, resName_list)
 
     for residue in residues:
@@ -676,7 +675,7 @@ def getAvNAPSAFileIndex(filename, thres=150):
     return AvNAPSAs, residues
 
 
-def getAvNAPSA(protein, atoms, thres=80):
+def getAvNAPSA(protein, atoms, resName_list=['LYS','ARG'], thres=150):
 
     threshold       = thres
 
@@ -685,7 +684,6 @@ def getAvNAPSA(protein, atoms, thres=80):
         atom.neighborCount = neighbor_list[i]
 
     residues        = residues_from_atoms(atoms)
-    resName_list    = ['GLN', 'ASN', 'LYS', 'ARG']
     residues        = filter_residues_with_resName(residues, resName_list)
 
     for residue in residues:

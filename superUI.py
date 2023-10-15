@@ -99,7 +99,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addItem(spacerItem6)
         self.formLayout_2.setLayout(1, QtWidgets.QFormLayout.FieldRole, self.horizontalLayout_3)
 
-        # Avnapsa threshold input
+        # Avnapsa threshold 입력창
         self.labelAvThres = QtWidgets.QLabel(self.centralwidget)
         self.labelAvThres.setObjectName("labelAvThres")
         self.formLayout_2.setWidget(8, QtWidgets.QFormLayout.LabelRole, self.labelAvThres)
@@ -130,13 +130,15 @@ class Ui_MainWindow(object):
         self.inputExclude.setMaximumSize(QtCore.QSize(16777215, 46))
         self.inputExclude.setObjectName("inputExclude")
         self.formLayout_2.setWidget(4, QtWidgets.QFormLayout.FieldRole, self.inputExclude)
-        self.labelInclude = QtWidgets.QLabel(self.centralwidget)
-        self.labelInclude.setObjectName("labelInclude")
-        self.formLayout_2.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.labelInclude)
-        self.inputInclude = QtWidgets.QTextEdit(self.centralwidget)
-        self.inputInclude.setMaximumSize(QtCore.QSize(16777215, 46))
-        self.inputInclude.setObjectName("inputInclude")
-        self.formLayout_2.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.inputInclude)
+        
+        # self.labelInclude = QtWidgets.QLabel(self.centralwidget)
+        # self.labelInclude.setObjectName("labelInclude")
+        # self.formLayout_2.setWidget(5, QtWidgets.QFormLayout.LabelRole, self.labelInclude)
+        # self.inputInclude = QtWidgets.QTextEdit(self.centralwidget)
+        # self.inputInclude.setMaximumSize(QtCore.QSize(16777215, 46))
+        # self.inputInclude.setObjectName("inputInclude")
+        # self.formLayout_2.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.inputInclude)
+        
         self.labelConsurf = QtWidgets.QLabel(self.centralwidget)
         self.labelConsurf.setObjectName("labelConsurf")
         self.formLayout_2.setWidget(6, QtWidgets.QFormLayout.LabelRole, self.labelConsurf)
@@ -304,7 +306,7 @@ class Ui_MainWindow(object):
 
         self.inputTarget.setText("R,K")
         self.inputStandin.setText("D,E")
-        self.inputInclude.setText("")
+        # self.inputInclude.setText("")
         self.inputExclude.setText("")
         self.inputAvThres.setText("150")
 
@@ -360,10 +362,11 @@ class Ui_MainWindow(object):
             target = self.inputTarget.toPlainText().split(',')
             standin = self.inputStandin.toPlainText().split(',')
             exclude = superSeq.formatSite(self.inputExclude.toPlainText()) # residues cannot be mutated
-            include = superSeq.formatSite(self.inputInclude.toPlainText()) # residues might be mutated
+            # include = superSeq.formatSite(self.inputInclude.toPlainText()) # residues might be mutated
 
-            include = list(include)
-            exclude = list(exclude)
+            # include = list(include)
+            include = []
+            exclude = [e-1 for e in list(exclude)]
 
             sSeq = superSeq(self.inputSeq.toPlainText())
 
@@ -373,8 +376,11 @@ class Ui_MainWindow(object):
 
             # AvNAPSA
 
+            aa_1to3l = {'R':'ARG','H':'HIS','K':'LYS','D':'ASP','E':'GLU','S':'SER','T':'THR','N':'ASN','Q':'GLN','C':'CYS','U':'SEC','G':'GLY','P':'PRO','A':'ALA','V':'VAL','I':'ILE','L':'LEU','M':'MET','F':'PHE','Y':'TYR','W':'TRP'}
+            target_3l = [aa_1to3l[a] for a in target]
+
             self.avnapsaResidues = []
-            scores , residues = AvNAPSA_class.getAvNAPSAFileIndex(filename=self.pdbfile, thres=avthres)
+            scores , residues = AvNAPSA_class.getAvNAPSAFileIndex(filename=self.pdbfile, resName_list=target_3l, thres=avthres)
             print("AvNAPSA Threshold:", avthres)
             for i,a in enumerate(residues):
                 if i>0 and a==residues[0]: break 
@@ -392,11 +398,11 @@ class Ui_MainWindow(object):
                     elif self.consurfScore[r[0]] <= 5:
                         include.append(r[0])
                         aaInfo[r[0]] = [r[1], self.consurfScore[r[0]]]
-                    elif self.consurfScore[r[0]] > 5:
-                        exclude.append(r[0])
+                    # elif self.consurfScore[r[0]] > 5:
+                    #     exclude.append(r[0])
 
-            include.sort()
-            print("include:", include)
+            include, exclude = set(include), set(exclude)
+            target = set(target)
 
             x, y1, y2, newSeq, mutated, mutatedScores = sSeq.superGraph(thres=thres,excl=exclude,incl=include,tar=target, stand=standin, scores=aaInfo)
             if not self.checkAdd.isChecked():
@@ -488,12 +494,12 @@ class Ui_MainWindow(object):
         "p, li { white-space: pre-wrap; }\n"
         "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8.25pt;\">-1</span></p></body></html>"))
-        self.labelInclude.setText(_translate("MainWindow", "Inclusion"))
-        self.inputInclude.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-        "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-        "p, li { white-space: pre-wrap; }\n"
-        "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
-        "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8.25pt;\">-1</span></p></body></html>"))
+        # self.labelInclude.setText(_translate("MainWindow", "Inclusion"))
+        # self.inputInclude.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+        # "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+        # "p, li { white-space: pre-wrap; }\n"
+        # "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:7.8pt; font-weight:400; font-style:normal;\">\n"
+        # "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8.25pt;\">-1</span></p></body></html>"))
         self.labelConsurf.setText(_translate("MainWindow", "ConSurf"))
         self.labelConsurfStatus.setText(_translate("MainWindow", "Not Imported"))
         self.buttonImportConsurf.setText(_translate("MainWindow", "Import"))
